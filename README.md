@@ -1,4 +1,3 @@
-```markdown
 # Aspire  Coupon System — 高并发微服务优惠券分发与核销平台
 
 基于 Spring Cloud Alibaba 构建，覆盖**热点券秒杀兑换**、**百万级 Excel 批量发券**、**P99 < 2ms 结算查询**以及 **Redisson 分布式锁 + 乐观锁双防并发核销** 的全链路优惠券中台系统。
@@ -225,9 +224,3 @@ Ali/
 - [ ] 引入 Guava BloomFilter 强化缓存穿透防御（目前基于空值缓存+双检锁）
 - [ ] ShardingSphere 读写分离配置
 - [ ] 对接 Prometheus + Grafana 可视化监控
-
----
-
-## 📝 License
-MIT License. 仅供学习参考，欢迎 Star ⭐️。
-```
