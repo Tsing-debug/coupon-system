@@ -1,0 +1,130 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  druid:
+    ds0:
+      url: jdbc:mysql://localhost:3306/coupon_db0?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8mb4
+      username: root
+      password: root
+    ds1:
+      url: jdbc:mysql://localhost:3306/coupon_db1?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8mb4
+      username: root
+      password: root
+
+  shardingsphere:
+    mode:
+      type: Memory
+    dataSources:
+      ds0:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/coupon_db0?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8mb4
+        username: root
+        password: root
+      ds1:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/coupon_db1?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8mb4
+        username: root
+        password: root
+    rules:
+      sharding:
+        tables:
+          coupon_template:
+            actual-data-nodes: ds$->{0..1}.coupon_template_$->{0..1}
+            database-strategy:
+              standard:
+                sharding-column: shop_number
+                sharding-algorithm-name: shop-db-hash-mod
+            table-strategy:
+              standard:
+                sharding-column: shop_number
+                sharding-algorithm-name: shop-table-hash-mod
+          user_coupon:
+            actual-data-nodes: ds$->{0..1}.user_coupon_$->{0..1}
+            database-strategy:
+              standard:
+                sharding-column: user_id
+                sharding-algorithm-name: user-db-hash-mod
+            table-strategy:
+              standard:
+                sharding-column: user_id
+                sharding-algorithm-name: user-table-hash-mod
+          exchange_activity:
+            actual-data-nodes: ds$->{0..1}.exchange_activity_$->{0..1}
+            database-strategy:
+              standard:
+                sharding-column: shop_number
+                sharding-algorithm-name: shop-db-hash-mod
+            table-strategy:
+              standard:
+                sharding-column: shop_number
+                sharding-algorithm-name: shop-table-hash-mod
+          outbox_task:
+            actual-data-nodes: ds$->{0..1}.outbox_task
+            database-strategy:
+              standard:
+                sharding-column: task_type
+                sharding-algorithm-name: outbox-db-hash-mod
+            table-strategy:
+              none:
+                any: ""
+        sharding-algorithms:
+          shop-db-hash-mod:
+            type: HASH_MOD
+            props:
+              sharding-count: 2
+          shop-table-hash-mod:
+            type: HASH_MOD
+            props:
+              sharding-count: 2
+          user-db-hash-mod:
+            type: HASH_MOD
+            props:
+              sharding-count: 2
+          user-table-hash-mod:
+            type: HASH_MOD
+            props:
+              sharding-count: 2
+          outbox-db-hash-mod:
+            type: HASH_MOD
+            props:
+              sharding-count: 2
+        props:
+          sql-show: true
+          allow-range-query-with-inline-sharding: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis123
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 32
+          max-idle: 16
+          min-idle: 8
+          max-wait: 3000ms
+
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: coupon-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+  consumer:
+    group: coupon-group
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0

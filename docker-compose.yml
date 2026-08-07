@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # ==================== Redis 单机 ====================
+  redis:
+    image: redis:7.2-alpine
+    container_name: ali-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass redis123
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ==================== RocketMQ NameServer ====================
+  namesrv:
+    image: apache/rocketmq:5.2.0
+    container_name: ali-namesrv
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
+    environment:
+      JAVA_OPT_EXT: "-server -Xms256m -Xmx256m"
+    restart: unless-stopped
+
+  # ==================== RocketMQ Broker ====================
+  broker:
+    image: apache/rocketmq:5.2.0
+    container_name: ali-broker
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+    command: sh mqbroker -n namesrv:9876
+    environment:
+      JAVA_OPT_EXT: "-server -Xms512m -Xmx512m"
+    depends_on:
+      - namesrv
+    restart: unless-stopped
+
+volumes:
+  redis-data:
